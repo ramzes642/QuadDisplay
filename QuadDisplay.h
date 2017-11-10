@@ -73,6 +73,7 @@
 #define QD_U 0b10000011
 #define QD_Y 0b10001001
 
+const static uint8_t numerals[] = {QD_0, QD_1, QD_2, QD_3, QD_4, QD_5, QD_6, QD_7, QD_8, QD_9, QD_UNDERSCORE};
 
 void displayInt(uint8_t pin, int val, bool padZeros=false, uint8_t dots=0x00);
 void displayFloat(uint8_t pin, float val, uint8_t precision, bool padZeros=false);

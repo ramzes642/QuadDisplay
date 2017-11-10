@@ -1,62 +1,23 @@
 
-#include <Arduino.h>
+#include <wiringPi.h>
+#include <math.h>
 
 #include "QuadDisplay.h"
 
-#include "pins_arduino.h"
-
-
-#ifdef __AVR_ATmega32U4__
-
-#define MACRO_DIGITAL_WRITE(a,b) (fastDigitalWrite(a,b))
-
-    //Fast version of digitalWrite, without using turnOffPWM
-    //
-void fastDigitalWrite(uint8_t pin, uint8_t val)
-{
-      //uint8_t timer = digitalPinToTimer(pin);
-    uint8_t bit = digitalPinToBitMask(pin);
-    uint8_t port = digitalPinToPort(pin);
-    volatile uint8_t *out;
-
-    if (port == NOT_A_PIN) return;
-
-    // If the pin that support PWM output, we need to turn it off
-    // before doing a digital write.
-    // DELETED. Timer is already off here . Amperka
-    // if (timer != NOT_ON_TIMER) turnOffPWM(timer);
-
-    out = portOutputRegister(port);
-
-    uint8_t oldSREG = SREG;
-    cli();
-
-    if (val == LOW) {
-        *out &= ~bit;
-    } else {
-        *out |= bit;
-    }
-
-    SREG = oldSREG;
-}
-
-
-#else
 
 #define MACRO_DIGITAL_WRITE(a,b) (digitalWrite(a,b))
 
-#endif
 
-const static uint8_t numerals[] = {QD_0, QD_1, QD_2, QD_3, QD_4, QD_5, QD_6, QD_7, QD_8, QD_9};
+int max(int a, int b) {
+    return a >= b ? a : b;
+}
 
-static void sendByte(uint8_t pin, byte data, byte n = 8)
+static void sendByte(uint8_t pin, uint8_t data, uint8_t n = 8)
 {
-    for (byte i = n; i > 0; i--) {
+    for (uint8_t i = n; i > 0; i--) {
         if (data & 1) {
-            noInterrupts();
             MACRO_DIGITAL_WRITE(pin, LOW);
             MACRO_DIGITAL_WRITE(pin, HIGH);
-            interrupts();
             delayMicroseconds(30);
         }
         else {
